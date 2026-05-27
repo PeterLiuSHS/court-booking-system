@@ -106,8 +106,6 @@ JWT_SECRET=your_secret_key
 ```
 ## API Endpoints
 
-## API Endpoints
-
 | Method | Endpoint | Description |
 |---|---|---|
 | POST | /api/register | Register a new user |
