@@ -24,7 +24,7 @@ async function connectDB() {
     console.log("Connect to MongoDB");
 
     const dbName = process.env.DB_NAME || "bookingDB";
-    const db = client.db("dbName");
+    const db = client.db(dbName);
     bookingsCollection = db.collection("bookings");
     usersCollection = db.collection("users");
     venuesCollection = db.collection("venues");

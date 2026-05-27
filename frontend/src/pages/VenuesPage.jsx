@@ -4,7 +4,7 @@ function VenuesPage({ venues }) {
 
   return (
     <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-      <h1 style={{ textAlign: "center", marginBottom: "24px" }}>venues</h1>
+      <h1 style={{ textAlign: "center", marginBottom: "24px" }}>Venues</h1>
 
       <div
         style={{
