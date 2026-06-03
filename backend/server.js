@@ -198,11 +198,13 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-app.post("/api/bookings", async (req, res) => {
+app.post("/api/bookings", verifyToken, async (req, res) => {
   try {
-    const { date, time, court, userId, userEmail } = req.body;
+    const { date, time, court } = req.body;
+    const userId = req.user.userId;
+    const userEmail = req.user.email;
 
-    if (!date || !time || !court || !userId || !userEmail) {
+    if (!date || !time || !court ) {
       return res.status(400).json({
         message: "Date, time, and court are required.",
       });
@@ -257,27 +259,43 @@ app.post("/api/bookings", async (req, res) => {
 
 const { ObjectId } = require("mongodb");
 
-app.delete("/api/bookings/:id", async (req, res) => {
-  const id = req.params.id;
+app.delete("/api/bookings/:id", verifyToken, async (req, res) => {
+  try {
+    const id = req.params.id;
 
-  const existingBooking = await bookingsCollection.findOne({
+    const existingBooking = await bookingsCollection.findOne({
     _id: new ObjectId(id),
   });
 
-  if (!existingBooking) {
-    return res.status(404).json({
-      message: "Booking not found.",
+    if (!existingBooking) {
+      return res.status(404).json({
+        message: "Booking not found.",
+      });
+    }
+    
+    const isOwner = existingBooking.userId === req.user.userId;
+    const isAdmin = req.user.role === "admin";
+
+    if (!isOwner && !isAdmin){
+      return res.status(403).json({
+        message: "You are not authorized to cancel this booking.",
+      });
+    }
+
+    await bookingsCollection.deleteOne({
+      _id: new ObjectId(id),
     });
-  }
 
-  await bookingsCollection.deleteOne({
-    _id: new ObjectId(id),
-  });
-
-  res.json({
+    res.json({
     message: "Booking cancelled successfully.",
     deletedBooking: existingBooking,
   });
+  } catch (error){
+    console.error("Error deleting booking:", error);
+    res.status(500).json({
+      message: "Failed to cancel booking.",
+    });
+  }
 });
 
 if (require.main === module){

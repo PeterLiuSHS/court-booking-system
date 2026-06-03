@@ -5,6 +5,7 @@ function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("user");
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
@@ -55,12 +56,40 @@ function RegisterPage() {
         />
 
         <label>Password</label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={inputStyle}
-        />
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            margin: "8px 0 16px 0",
+          }}
+        >
+          <input
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={{
+              ...inputStyle,
+              margin: 0,
+              flex: 1,
+            }}
+          />
+
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            style={{
+              border: "none",
+              backgroundColor: "transparent",
+              color: "#93c5fd",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {showPassword ? "Hide" : "Show"}
+          </button>
+        </div>
 
         <label>Role</label>
         <select

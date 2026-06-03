@@ -59,15 +59,16 @@ function ReservePage({ bookings, setBookings, currentUser, venues }) {
       date: selectedDate,
       time: selectedTime,
       court: selectedCourt,
-      userId: currentUser._id,
-      userEmail: currentUser.email,
     };
 
     try {
+      const token = localStorage.getItem("token");
+
       const response = await fetch("http://localhost:5000/api/bookings", {
         method: "POST",    // create action
         headers: {
           "Content-Type": "application/json",  // tell backend the type of data
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(newBooking),    // data send to backend
       });
