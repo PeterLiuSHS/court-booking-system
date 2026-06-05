@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 
 function DashboardPage({ bookings }) {
-  
   const [users, setUsers] = useState([]);
 
-  useEffect(()=>{
+  useEffect(() => {
     const fetchUsers = async () => {
       try {
         const token = localStorage.getItem("token");
@@ -15,12 +14,12 @@ function DashboardPage({ bookings }) {
         });
         const data = await response.json();
         setUsers(data);
-      } catch (error){
+      } catch (error) {
         console.error("Error fetching users:", error);
       }
     };
     fetchUsers();
-  },[]);
+  }, []);
 
   if (bookings.length === 0) {
     return (
@@ -80,6 +79,24 @@ function DashboardPage({ bookings }) {
   const monthCounts = countByMonth(bookings);
   const weekdayCounts = countByWeekday(bookings);
 
+  const sortedTimeCounts = Object.entries(timeCounts).sort((a, b) =>
+    a[0].localeCompare(b[0]),
+  );
+
+  const weekdayOrder = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
+
+  const sortedWeekdayCounts = weekdayOrder
+    .filter((day) => weekdayCounts[day] !== undefined)
+    .map((day) => [day, weekdayCounts[day]]);
+
   const getTopLabel = (data) => {
     const entries = Object.entries(data);
 
@@ -97,17 +114,18 @@ function DashboardPage({ bookings }) {
   const mostPopularCourt = getTopLabel(courtCounts);
   const peakTimeSlot = getTopLabel(timeCounts);
 
-  const renderBars = (data) => {
-    const values = Object.values(data);
+  const renderBars = (data, sortedEntries = null) => {
+    const entries = sortedEntries || Object.entries(data);
+    const values = entries.map(([, value]) => value);
 
     if (values.length === 0) {
       return <p style={{ color: "#cbd5e1" }}>No data available.</p>;
     }
-    const maxValue = Math.max(...Object.values(data));
+    const maxValue = Math.max(...values);
 
     return (
       <div>
-        {Object.entries(data).map(([label, value]) => (
+        {entries.map(([label, value]) => (
           <div key={label} style={{ marginBottom: "14px" }}>
             <div
               style={{
@@ -201,7 +219,7 @@ function DashboardPage({ bookings }) {
 
         <div style={cardStyle}>
           <h2>Bookings by Time Slot</h2>
-          {renderBars(timeCounts)}
+          {renderBars(timeCounts, sortedTimeCounts)}
         </div>
 
         <div style={cardStyle}>
@@ -211,7 +229,7 @@ function DashboardPage({ bookings }) {
 
         <div style={cardStyle}>
           <h2>Bookings by Weekday</h2>
-          {renderBars(weekdayCounts)}
+          {renderBars(weekdayCounts, sortedWeekdayCounts)}
         </div>
       </div>
     </div>
