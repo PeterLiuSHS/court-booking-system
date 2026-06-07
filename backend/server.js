@@ -1,3 +1,9 @@
+const {
+  validateBookingInput,
+  isBookingDateValid,
+  canCancelBooking,
+} = require("./utils/bookingUtils");
+
 require("dotenv").config();
 const uri = process.env.MONGODB_URI;
 const { MongoClient } = require("mongodb");
@@ -204,19 +210,13 @@ app.post("/api/bookings", verifyToken, async (req, res) => {
     const userId = req.user.userId;
     const userEmail = req.user.email;
 
-    if (!date || !time || !court ) {
+    if (!validateBookingInput({date, time, court}) ) {
       return res.status(400).json({
         message: "Date, time, and court are required.",
       });
     }
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const selected = new Date(date);
-    selected.setHours(0, 0, 0, 0);
-
-    if (selected <= today) {
+    if (!isBookingDateValid(date)) {
       return res.status(400).json({
         message: "Bookings must be made at least one day in advance.",
       });
@@ -273,10 +273,8 @@ app.delete("/api/bookings/:id", verifyToken, async (req, res) => {
       });
     }
     
-    const isOwner = existingBooking.userId === req.user.userId;
-    const isAdmin = req.user.role === "admin";
 
-    if (!isOwner && !isAdmin){
+    if (!canCancelBooking(existingBooking, req.user)){
       return res.status(403).json({
         message: "You are not authorized to cancel this booking.",
       });
